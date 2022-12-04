@@ -31,11 +31,11 @@
  *                     |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| RW/--
  *                     |                              | RW/--
  *                     |   Remapped Physical Memory   | RW/--
- *                     |                              | RW/--
+ *                     |                              | RW/-- (在此之上一一个物理页对应)
  *    KERNBASE, ---->  +------------------------------+ 0xf0000000      --+
- *    KSTACKTOP        |     CPU0's Kernel Stack      | RW/--  KSTKSIZE   |
+ *    KSTACKTOP        |     CPU0's Kernel Stack      | RW/--  KSTKSIZE   | (内核栈空间)
  *                     | - - - - - - - - - - - - - - -|                   |
- *                     |      Invalid Memory (*)      | --/--  KSTKGAP    |
+ *                     |      Invalid Memory (*)      | --/--  KSTKGAP    |  (守护页,不分配映射,防止溢出,下面一直到MMIOLIM都不用)
  *                     +------------------------------+                   |
  *                     |     CPU1's Kernel Stack      | RW/--  KSTKSIZE   |
  *                     | - - - - - - - - - - - - - - -|                 PTSIZE
@@ -46,13 +46,13 @@
  *    MMIOLIM ------>  +------------------------------+ 0xefc00000      --+
  *                     |       Memory-mapped I/O      | RW/--  PTSIZE
  * ULIM, MMIOBASE -->  +------------------------------+ 0xef800000
- *                     |  Cur. Page Table (User R-)   | R-/R-  PTSIZE
+ *                     |  Cur. Page Table (User R-)   | R-/R-  PTSIZE  (页表) 
  *    UVPT      ---->  +------------------------------+ 0xef400000
- *                     |          RO PAGES            | R-/R-  PTSIZE
+ *                     |          RO PAGES            | R-/R-  PTSIZE (物理页的PageInfo信息)
  *    UPAGES    ---->  +------------------------------+ 0xef000000
- *                     |           RO ENVS            | R-/R-  PTSIZE
+ *                     |           RO ENVS            | R-/R-  PTSIZE  (所有envs的信息)
  * UTOP,UENVS ------>  +------------------------------+ 0xeec00000
- * UXSTACKTOP -/       |     User Exception Stack     | RW/RW  PGSIZE
+ * UXSTACKTOP -/       |     User Exception Stack     | RW/RW  PGSIZE  
  *                     +------------------------------+ 0xeebff000
  *                     |       Empty Memory (*)       | --/--  PGSIZE
  *    USTACKTOP  --->  +------------------------------+ 0xeebfe000
@@ -84,6 +84,7 @@
 
 
 // All physical memory mapped at this address
+#define MAXADDR 	0xFFFFFFFF
 #define	KERNBASE	0xF0000000
 
 // At IOPHYSMEM (640K) there is a 384K hole for I/O.  From the kernel,
