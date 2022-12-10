@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "string.h": "c",
+        "kclock.h": "c",
+        "monitor.h": "c",
+        "lib.h": "c"
+    }
+}
